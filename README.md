@@ -22,6 +22,9 @@ python -m venv venv
 
 ### 2. Kich hoat moi truong ao:
 
+```bash
+cmd
+```
 **Windows:**
 
 ```bash
@@ -56,7 +59,7 @@ Ban can cung cap **Gemini API Key** trong file `main.py` de ung dung hoat dong:
 GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"
 ```
 
-> Co the lay API Key tai: [https://aistudio.google.com/u/1/apikey?hl=vi](https://aistudio.google.com/u/1/apikey?hl=vi)
+> Co the lay API Key tai: [https://aistudio.google.com/u/0/apikey?hl=vi&pli=1](https://aistudio.google.com/u/0/apikey?hl=vi&pli=1)
 
 ---
 
