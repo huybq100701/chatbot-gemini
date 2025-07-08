@@ -12,7 +12,7 @@ from google import genai
 from google.genai import types
 
 # --- Gemini API Configuration ---
-GEMINI_API_KEY = "YOUR_API_KEY"
+GEMINI_API_KEY = "AIzaSyAzzlB9Z0NC4Oq1rtFtO-JnWZKJA2VK1y0"
 gemini = genai.Client(api_key=GEMINI_API_KEY)
 
 # --- Default Config ---
@@ -43,34 +43,27 @@ def read_document_text(filepath):
             return f.read()
 
 # --- Core Functions ---
-def chat_stream(message, chatbox, max_tokens, temp, top_p, stop_seq, sys_inst):
-    stop_sequences = [s.strip() for s in stop_seq.split(",") if s.strip()]
+def chat_with_gemini(message, chatbox, max_tokens, temp, top_p, stop_seq, sys_inst):
     try:
-        yield "", chatbox + [(message, "Đang phản hồi...")]
-
-        full_prompt = f"{sys_inst}\n\n{message}"  
-        stream = gemini.models.generate_content_stream(
+        stop_sequences = [s.strip() for s in stop_seq.split(",") if s.strip()]
+        response = gemini.models.generate_content(
             model=GEMINI_TEXT_MODEL,
             config=types.GenerateContentConfig(
+                system_instruction=sys_inst,
                 temperature=temp,
                 max_output_tokens=max_tokens,
                 top_p=top_p,
                 stop_sequences=stop_sequences,
             ),
-            contents=[
-                types.Content(role="user", parts=[types.Part(text=full_prompt)])
-            ],
+            contents=[types.Content(role="user", parts=[types.Part(text=message)])],
         )
-
-        reply = ""
-        for chunk in stream:
-            if chunk.text:
-                reply += chunk.text
-                yield "", chatbox[:-1] + [(message, reply)]
-
+        reply = response.text
+        chatbox.append((message, reply))
+        return "", chatbox
     except Exception as e:
         traceback.print_exc()
-        yield "", chatbox + [(message, f"Lỗi: {e}")]
+        chatbox.append((message, f"Lỗi: {e}"))
+        return "", chatbox
 
 def summarize_document(file_obj, chatbox, max_tokens, temp, top_p, sys_inst):
     try:
@@ -168,17 +161,17 @@ with gr.Blocks(title="Gemini Multimodal Chatbot") as demo:
 
     with gr.Tabs():
         # --- Tab Chat ---
-        with gr.TabItem("💬 Chat (Streaming)"):
+        with gr.TabItem("💬 Chat"):
             sys_inst_chat = gr.Textbox(label="Hướng dẫn Hệ thống", value="Bạn là trợ lý AI thân thiện, trả lời bằng tiếng Việt.")
-            chatbox = gr.Chatbot(layout="bubble")
-            msg = gr.Textbox(label="Nhập câu hỏi... (Enter để gửi, Streaming)")
+            chatbox = gr.Chatbot(layout="bubble")  # 💡 Đây là điểm chỉnh để user bên phải, bot bên trái
+            msg = gr.Textbox(label="Nhập câu hỏi...")
+            btn_send = gr.Button("Gửi")
             btn_clear = gr.Button("🗑️ Xóa Lịch Sử")
-            msg.submit(
-                chat_stream,
-                [msg, chatbox, max_tokens, temperature, top_p, stop_sequences, sys_inst_chat],
-                [msg, chatbox]
-            )
+
+            btn_send.click(chat_with_gemini, [msg, chatbox, max_tokens, temperature, top_p, stop_sequences, sys_inst_chat], [msg, chatbox])
+            msg.submit(chat_with_gemini, [msg, chatbox, max_tokens, temperature, top_p, stop_sequences, sys_inst_chat], [msg, chatbox])
             btn_clear.click(lambda: [], outputs=[chatbox])
+
         # --- Tab Tóm tắt ---
         with gr.TabItem("📄 Tóm tắt Tài liệu"):
             sys_inst_doc = gr.Textbox(label="Hướng dẫn Hệ thống", value="Bạn là trợ lý AI chuyên tóm tắt tài liệu, trả lời bằng tiếng Việt.")
