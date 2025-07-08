@@ -10,7 +10,7 @@ from google import genai
 from google.genai import types
 
 # --- Gemini API Configuration ---
-GEMINI_API_KEY = "AIzaSyDW1ER2lh5J7DDwICRK2gBv6i45VqzG0Tg" # set GEMINI_API_KEY trong env
+GEMINI_API_KEY = "YOUR_API_KEY" # set GEMINI_API_KEY trong env
 if not GEMINI_API_KEY:
     raise ValueError("Thiếu Gemini API Key. Mở thư mục app chạy: export GEMINI_API_KEY=...")
 
