@@ -1,0 +1,10 @@
+gradio
+Pillow
+requests
+httpx
+google-genai
+python-docx 
+openpyxl
+
+
+
